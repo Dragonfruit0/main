@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enchanted Love Realm</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Parisienne&family=Quicksand:wght@300;500;700&family=Marck+Script&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #2a0a3a, #1a0522);
+            font-family: 'Quicksand', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Counters Container */
+        .counters-container {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+            z-index: 100;
+        }
+
+        .counter-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px 35px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 220px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .counter-title {
+            font-family: 'Parisienne', cursive;
+            color: #ffd3f0;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .counter-number {
+            font-size: 2.8rem;
+            background: linear-gradient(45deg, #ff9de6, #ff6bda);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 15px 0;
+            font-weight: 700;
+        }
+
+        /* Eid Timer Container */
+        .eid-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 30px;
+            padding: 40px 60px;
+            text-align: center;
+            margin-top: 150px;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .timer-box {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .timer-number {
+            font-size: 3.5rem;
+            background: linear-gradient(45deg, #ff9de6, #ff6bda);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-family: 'Marck Script', cursive;
+        }
+
+        .timer-label {
+            color: #ffd3f0;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="counters-container">
+        <div class="counter-box">
+            <div class="counter-title">Faiz's Missing</div>
+            <div class="counter-number" id="faizCounter">0</div>
+            <button onclick="incrementCounter('faiz')">Miss You More 💔</button>
+        </div>
+
+        <div class="counter-box">
+            <div class="counter-title">Nida's Missing</div>
+            <div class="counter-number" id="nidaCounter">0</div>
+            <button onclick="incrementCounter('nida')">Miss You Too 💔</button>
+        </div>
+    </div>
+
+    <div class="eid-container">
+        <div class="counter-title" style="font-size: 2.5rem;">Eid Countdown 🌙</div>
+        <div class="timer-box" id="countdown">
+            <div class="timer-number" id="days">00</div>
+            <div class="timer-number" id="hours">00</div>
+            <div class="timer-number" id="minutes">00</div>
+            <div class="timer-number" id="seconds">00</div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase config (Fixing storageBucket issue)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBeo2NwH9Z1TPu_nXQ7HvEKHO8vS5Pun0M",
+            authDomain: "counters-e8e28.firebaseapp.com",
+            projectId: "counters-e8e28",
+            storageBucket: "counters-e8e28.appspot.com",
+            messagingSenderId: "528032871144",
+            appId: "1:528032871144:web:f72e8aa46705ccf6f00f5d"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const countersRef = db.collection('counters').doc('missingCounts');
+
+        // Eid Countdown Timer Fix
+        function updateTimer() {
+            const eidDate = new Date('2025-03-30T19:00:00Z').getTime();
+            const now = new Date().getTime();
+            const distance = eidDate - now;
+
+            if (distance < 0) {
+                document.getElementById('countdown').innerHTML = "Eid Mubarak!";
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Counter Logic Fix
+        function incrementCounter(person) {
+            countersRef.get().then((doc) => {
+                let data = doc.exists ? doc.data() : { faiz: 0, nida: 0 };
+
+                data[person] = (data[person] || 0) + 1;
+
+                countersRef.set(data, { merge: true }).then(() => {
+                    document.getElementById(person + "Counter").textContent = data[person];
+                });
+            });
+        }
+
+        // Load counters on page load
+        countersRef.get().then(doc => {
+            if (doc.exists) {
+                let data = doc.data();
+                document.getElementById("faizCounter").textContent = data.faiz || 0;
+                document.getElementById("nidaCounter").textContent = data.nida || 0;
+            }
+        });
+
+    </script>
+</body>
+</html>
