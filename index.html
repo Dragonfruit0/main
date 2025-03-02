@@ -35,14 +35,18 @@
       const docSnap = await getDoc(countersRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
+        console.log('Fetched data:', data);  // Debugging
         faizCount = data.faiz || 0;
         nidaCount = data.nida || 0;
         updateDisplays();
+      } else {
+        console.log('No such document!');
       }
     }
 
     // Function to update the displayed counters
     function updateDisplays() {
+      console.log('Updating displays: faizCount =', faizCount, 'nidaCount =', nidaCount);  // Debugging
       document.getElementById('faizCounter').textContent = faizCount;
       document.getElementById('nidaCounter').textContent = nidaCount;
     }
@@ -57,6 +61,7 @@
 
       // Update Firestore with the new counts
       try {
+        console.log('Updating Firestore:', { faiz: faizCount, nida: nidaCount });  // Debugging
         await setDoc(countersRef, {
           faiz: faizCount,
           nida: nidaCount
@@ -270,56 +275,24 @@
   </div>
 
   <div class="eid-container">
-    <div class="counter-title" style="font-size: 2.5rem;">Eid Countdown 🌙</div>
-    <div class="timer-box" id="countdown">
+    <div class="timer-box">
       <div class="timer-item">
-        <div class="timer-number" id="days">00</div>
+        <div class="timer-number" id="days">0</div>
         <div class="timer-label">Days</div>
       </div>
       <div class="timer-item">
-        <div class="timer-number" id="hours">00</div>
+        <div class="timer-number" id="hours">0</div>
         <div class="timer-label">Hours</div>
       </div>
       <div class="timer-item">
-        <div class="timer-number" id="minutes">00</div>
+        <div class="timer-number" id="minutes">0</div>
         <div class="timer-label">Minutes</div>
       </div>
       <div class="timer-item">
-        <div class="timer-number" id="seconds">00</div>
+        <div class="timer-number" id="seconds">0</div>
         <div class="timer-label">Seconds</div>
       </div>
     </div>
   </div>
-
-  <script>
-    // ===== Eid Countdown Timer =====
-    const eidDate = new Date('2025-03-30T19:00:00').getTime();
-
-    function updateTimer() {
-      const now = new Date().getTime();
-      const distance = eidDate - now;
-
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      if (distance < 0) {
-        document.getElementById('days').textContent = '00';
-        document.getElementById('hours').textContent = '00';
-        document.getElementById('minutes').textContent = '00';
-        document.getElementById('seconds').textContent = '00';
-        return;
-      }
-
-      document.getElementById('days').textContent = days.toString().padStart(2, '0');
-      document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-      document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-      document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-    }
-
-    updateTimer();
-    setInterval(updateTimer, 1000);
-  </script>
 </body>
 </html>
